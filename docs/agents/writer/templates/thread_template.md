@@ -1,0 +1,187 @@
+# Social Media Draft: [Feature/Change Name]
+
+> **Generated**: [YYYY-MM-DD HH:MM:SS]
+> **Source**: [data/context/summary_file.md OR free-form topic]
+> **Content Strategy**: [Hero Demo / Value-First / Problem-Solution / Technical Deep Dive / Developer Experience]
+
+---
+
+**Platform**: Twitter/X (or LinkedIn / Both)
+**Type**: Thread ([Number] tweets)
+**Media Needed**: [Yes / No] - [Description if yes]
+**Estimated Engagement**: [High / Medium / Low] based on [reason]
+
+---
+
+## Tweet 1 (Hook)
+
+[Opening tweet with strong hook - grab attention in first 1-2 lines]
+[Include relevant emoji if appropriate: 🚀 ✨ 🎉 🔥 💪 ⚡ 🌙 📊 🐛]
+[Keep under 280 characters]
+
+---
+
+## Tweet 2 ([Context/Problem/Background])
+
+[Explain the context or problem]
+[Why did this matter? What was the challenge?]
+[Set up the story]
+
+---
+
+## Tweet 3 ([Solution/Implementation/Details])
+
+[Describe what you did]
+[Technical details in accessible language]
+[How you solved it]
+
+---
+
+## Tweet 4 ([Results/Impact/Learnings]) *[Optional]*
+
+[Share the outcomes]
+[Include metrics if available]
+[What did you learn?]
+
+---
+
+## Tweet 5 (Engagement/CTA) *[Final Tweet]*
+
+[Call to action or engagement question]
+[Invite feedback, questions, discussion]
+[Thank contributors or acknowledge inspiration]
+[Link to docs/demo/repo if relevant]
+
+---
+
+## Media Assets Needed
+
+### Required
+- [ ] [Type]: [Specific description of what to create/screenshot]
+  - **File**: [Suggested filename, e.g., darkmode_comparison.png]
+  - **Content**: [What should be shown in the image]
+  - **Format**: [Screenshot / Diagram / Chart / Code Snippet]
+  - **Notes**: [Any special requirements]
+
+### Optional
+- [ ] [Type]: [Description]
+  - **File**: [Filename]
+  - **Content**: [What should be shown]
+  - **Purpose**: [Why this enhances the post]
+
+---
+
+## Links to Include
+
+- [ ] [LINK TYPE]: [URL or placeholder]
+  - **Purpose**: [Demo / Documentation / GitHub Repo / Blog Post]
+  - **Placement**: [Which tweet to include it in]
+
+---
+
+## Hashtags
+
+[2-3 relevant hashtags - ALWAYS include #BuildInPublic]
+
+**Primary**: #BuildInPublic
+**Technology**: #[TechStack] (e.g., #React, #Python, #WebDev)
+**Category**: #[Category] (e.g., #SaaS, #OpenSource, #IndieDev)
+
+**Placement**: End of final tweet
+
+---
+
+## Platform Variations
+
+### Twitter/X Version
+[Use this version as-is - optimized for 280 chars per tweet]
+
+### LinkedIn Version (if applicable)
+[Expanded version for LinkedIn with more context]
+[Can combine multiple tweets into paragraphs]
+[More professional tone, less casual]
+
+---
+
+## Notes for Publisher
+
+**Timing Recommendation**: [When to post - e.g., Tuesday morning, after feature launch, etc.]
+
+**Engagement Strategy**: [How to handle replies, what questions to watch for]
+
+**Follow-up**: [Any planned follow-up posts or threads]
+
+**Warnings/Considerations**:
+- [Any sensitive topics or potential misunderstandings to watch for]
+- [Are there any claims that need verification before posting?]
+- [Should legal/compliance review this?]
+
+---
+
+## Alternative Hooks (If Primary Hook Doesn't Resonate)
+
+Sometimes the first hook isn't the best. Here are alternatives:
+
+1. [Alternative hook option 1]
+2. [Alternative hook option 2]
+3. [Alternative hook option 3]
+
+---
+
+## Thread Flow Check
+
+- [ ] Hook grabs attention in first line
+- [ ] Story/narrative is clear and flows logically
+- [ ] Technical details are accessible to broader audience
+- [ ] Specific numbers/metrics are included where available
+- [ ] Value proposition is clear (why should anyone care?)
+- [ ] Personality and voice shine through
+- [ ] Engagement hook at the end (question/CTA)
+- [ ] Each tweet is under 280 characters
+- [ ] Line breaks used for readability
+- [ ] Emojis used sparingly (1-2 per thread max)
+- [ ] Hashtags at the end only
+- [ ] No typos or grammatical errors
+
+---
+
+## Estimated Reach & Impact
+
+**Expected Performance**:
+- **Impressions**: [Low: <1K / Medium: 1K-10K / High: >10K]
+- **Engagement Rate**: [Low: <2% / Medium: 2-5% / High: >5%]
+- **Reason**: [Why you expect this performance level]
+
+**Target Audience**:
+- Primary: [Who will this resonate most with?]
+- Secondary: [Who else might find this interesting?]
+
+**Best Case Scenario**: [What happens if this goes viral / gets great engagement]
+
+**Worst Case Scenario**: [What if engagement is low - is that OK?]
+
+---
+
+## Approval Checklist
+
+Before publishing, confirm:
+
+- [ ] All claims are accurate and verifiable
+- [ ] No sensitive/proprietary information shared
+- [ ] Links are tested and work
+- [ ] Media assets are created and look good
+- [ ] Tone matches brand voice
+- [ ] Typos checked, grammar reviewed
+- [ ] Hashtags are relevant and spelled correctly
+- [ ] Call-to-action is clear
+- [ ] Ready for public consumption
+
+---
+
+**Status**: [DRAFT / WAITING_APPROVAL / APPROVED / PUBLISHED]
+
+**Approver Notes**: [Space for human reviewer to add comments]
+
+---
+
+_Generated by Writer Agent • Content Strategy: Build in Public_

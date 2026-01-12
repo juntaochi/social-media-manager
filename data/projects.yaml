@@ -1,0 +1,18 @@
+# Project Registry
+# This file tracks all projects that the content pipeline monitors.
+# The Analyst agent uses this to understand project context and generate tickets.
+
+projects:
+  # Example project entry
+  - repo: "{env:GITHUB_REPO}"
+    name: "Social Media Manager"
+    description: "AI-powered automation for Build in Public content from GitHub activity"
+    local_path: "{env:PROJECT_ROOT}"
+    
+    # Social set ID for Typefully (get from typefully_list_social_sets)
+    typefully_social_set_id: "{env:TYPEFULLY_SOCIAL_SET_ID}"
+
+# Add more projects below:
+# - repo: username/another-project
+#   name: "Project Name"
+#   ...
