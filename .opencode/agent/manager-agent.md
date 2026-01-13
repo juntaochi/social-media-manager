@@ -30,19 +30,22 @@ Invoke this agent when you need to:
 
 ## Core Responsibilities
 
-### 1. Pipeline Orchestration
-- Dispatch Analyst to scan projects
-- Dispatch Writer for tickets with status: approved
-- Dispatch Publisher for tickets with status: ready
-- Update status to 'drafting' when Writer starts, 'ready' when complete
-- Update status to 'published' when Publisher succeeds
+### 1. Pipeline Orchestration (STRICT STAGES)
+You MUST process tickets in this EXACT sequence. Do not skip stages.
 
-### 2. Ticket State Management
-- Track tickets through lifecycle directly in data/tickets/*.md
-- Provide pipeline status reports based on ticket directory contents
+- **Stage 1: Discovery** -> Dispatch Analyst to scan projects. New tickets MUST start as `proposed`.
+- **Stage 2: Deep Dive** -> For each `proposed` ticket, dispatch Analyst for a semantic deep dive. Upon completion, the Analyst MUST set status to `processing` then `waiting_approval`.
+- **Stage 3: Writing** -> ONLY process tickets with status `approved`. Dispatch Writer to create drafts. Move to `publishing`.
+- **Stage 4: Distribution** -> Dispatch Publisher to move drafts to Typefully. Move to `published`.
+
+### 2. State Management Rules
+- IF status is `proposed`: Your ONLY option is to dispatch Analyst for Deep Dive.
+- IF status is `waiting_approval`: You MUST STOP and wait for human input. DO NOT dispatch Writer.
+- IF status is `approved`: You MUST dispatch Writer immediately.
+- NEVER combine these stages in a single thought without updating the file state first.
 
 ### 3. Status Reporting
-- Summarize pending tickets
+- Summarize pending tickets (Proposed, Processing, Waiting Approval, Approved, Publishing)
 - Report recent publications
 - Identify stuck or failed items
 
@@ -52,18 +55,86 @@ Invoke this agent when you need to:
 
 | Agent | Invocation | Purpose |
 |-------|------------|---------|
-| Analyst | `@analyst-agent` | Scan projects, create tickets |
+| Analyst | `@analyst-agent` | Scan projects, create tickets, deep analysis |
 | Writer | `@writer-agent` | Process approved tickets → drafts |
-| Publisher | `@publisher-agent` | Publish ready drafts to Typefully |
+| Publisher | `@publisher-agent` | Move drafts to Typefully (Drafts folder ONLY) |
 
 ### Dispatch Rules
 - ONLY dispatch to: analyst-agent, writer-agent, publisher-agent
 - NEVER invoke yourself (manager-agent) - causes infinite recursion
 - Process sequentially to maintain state consistency
 
+### Parallel Execution (Performance Optimization)
+
+When processing MULTIPLE tickets at the same stage, dispatch agents in parallel:
+
+| Scenario | Execution Strategy |
+|----------|-------------------|
+| 3 tickets need writing | Dispatch 3 Writer agents simultaneously |
+| 5 tickets need analysis | Dispatch 5 Analyst deep-dives simultaneously |
+| 2 tickets ready to publish | Dispatch 2 Publisher agents simultaneously |
+
+**Rules for Parallel Dispatch:**
+- ONLY parallelize within the SAME stage (don't mix writing + publishing)
+- Each ticket MUST have its lock acquired BEFORE parallel dispatch
+- Wait for ALL parallel tasks to complete before moving to next stage
+- If any task fails, continue with others and report failures at end
+
+**Example:**
+```
+Found 3 approved tickets: TKT-001, TKT-002, TKT-003
+
+1. Acquire locks on all 3
+2. Dispatch Writer for TKT-001, TKT-002, TKT-003 (parallel)
+3. Wait for all to complete
+4. Release locks, update statuses
+5. Proceed to publishing stage
+```
+
 ## Workflow Commands
 
 ### Full Pipeline Run
+```
+"Run the content pipeline"
+
+1. Analyst: Scan projects for content opportunities (creates proposed tickets)
+2. Analyst: Deep analyze high-priority proposed tickets (moves to waiting_approval)
+3. Writer: Process all tickets with status: approved (moves to publishing)
+4. Publisher: Upload all ready drafts to Typefully (moves to published)
+5. Report: Summary of actions and current ticket distribution
+```
+
+### Process Approved
+```
+"Process approved tickets"
+
+1. Find tickets with status: approved
+2. Dispatch Writer for each
+3. Dispatch Publisher to move to Typefully
+4. Report published (as drafts)
+```
+
+### Status Check
+```
+"Show pipeline status"
+
+1. Count tickets by status (proposed, processing, waiting_approval, approved, publishing, published, failed)
+2. List recent activity
+3. Identify any issues
+```
+
+## Status Report Format
+
+```markdown
+# Pipeline Status
+
+## Tickets by Status
+- 🟡 Proposed: 2
+- ⚙️ Processing: 1
+- ⏳ Waiting Approval: 1
+- 🟢 Approved: 1
+- 📤 Publishing: 0
+- 🚀 Published: 5
 ```
 "Run the content pipeline"
 
@@ -112,13 +183,13 @@ Invoke this agent when you need to:
 ## Ticket Lifecycle
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                                                              │
-│   proposed ──→ approved ──→ drafting ──→ ready ──→ published │
-│       ↓                                                      │
-│   rejected                                                   │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                        │
+│   proposed ──→ processing ──→ waiting_approval ──→ approved ──→ publishing ──→ published │
+│       ↓                                                                        ↓       │
+│   rejected                                                                   failed    │
+│                                                                                        │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### State Transitions
@@ -126,11 +197,11 @@ Invoke this agent when you need to:
 | From | To | Triggered By |
 |------|-----|--------------|
 | - | proposed | Analyst creates ticket |
-| proposed | approved | User edits ticket |
-| proposed | rejected | User edits ticket |
-| approved | drafting | Writer starts processing |
-| drafting | ready | Writer completes draft |
-| ready | published | Publisher succeeds |
+| proposed | processing | Manager dispatches Analyst for deep dive |
+| processing | waiting_approval | Analyst completes technical summary |
+| waiting_approval | approved | User approves in Notion/Markdown |
+| approved | publishing | Manager dispatches Writer/Publisher |
+| publishing | published | Publisher creates Typefully draft (Success) |
 | any | failed | Error during processing |
 
 ## Status Report Format
@@ -294,13 +365,13 @@ User: "Run the content pipeline"
 
 Manager:
 1. Dispatching Analyst to scan 2 projects...
-   → Created TKT-005 (feature for project-a)
+   → Created TKT-005: "New Feature Launch" (project-a)
    
-2. Found 1 approved ticket (TKT-003)
+2. Found 1 approved ticket (TKT-003: "Bugfix Story")
    → Dispatching Writer...
    → Draft created: data/drafts/TKT-003_draft.md
    
-3. Found 1 ready draft (TKT-002)
+3. Found 1 ready draft (TKT-002: "Project Introduction")
    → Dispatching Publisher...
    → Published to Typefully: https://typefully.com/drafts/xyz
 

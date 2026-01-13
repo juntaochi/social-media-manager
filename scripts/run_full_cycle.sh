@@ -19,13 +19,13 @@ if [ -f .env ]; then
 fi
 
 echo "🔄 [1/3] 从 Notion 同步最新任务..."
-python3 scripts/bridge_notion.py --pull-only
+python3 scripts/bridge_tickets.py --pull-only
 
 echo "⚙️  [2/3] 运行 Pipeline 处理任务..."
 ./scripts/run_pipeline.sh full
 
 echo "📤 [3/3] 推送结果回 Notion..."
-python3 scripts/bridge_notion.py --push-only
+python3 scripts/bridge_tickets.py --push-only
 
 echo "=================================="
 echo "  ✅ 完整周期执行完成！"

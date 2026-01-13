@@ -25,7 +25,7 @@ git checkout -b "$BRANCH_NAME"
 AGENT_PROMPT="You are in a dedicated Zellij session for a long-running task. 
 TASK: $TASK_DESCRIPTION
 
-1. Create a massive, detailed TODO list in data/tasks.md for this feature.
+1. Break down the task into tickets in data/tickets/ directory.
 2. Implement every item one by one.
 3. Debug thoroughly after implementation.
 4. Document the entire process in both Chinese and English in a new file under docs/archive/ralphloop-$TIMESTAMP.md.

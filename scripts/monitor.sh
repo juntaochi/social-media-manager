@@ -49,31 +49,30 @@ while true; do
     echo ""
     echo "📋 任务状态 (data/tickets/):"
     if [ -d data/tickets ]; then
-        PROPOSED=$(grep -l "status: proposed" data/tickets/*.md 2>/dev/null | wc -l)
-        APPROVED=$(grep -l "status: approved" data/tickets/*.md 2>/dev/null | wc -l)
-        DRAFTING=$(grep -l "status: drafting" data/tickets/*.md 2>/dev/null | wc -l)
-        READY=$(grep -l "status: ready" data/tickets/*.md 2>/dev/null | wc -l)
-        PUBLISHED=$(grep -l "status: published" data/tickets/*.md 2>/dev/null | wc -l)
-        FAILED=$(grep -l "status: failed" data/tickets/*.md 2>/dev/null | wc -l)
+        PROPOSED=$(find data/tickets -name "TKT-*.md" -exec grep -lE 'status:\s*"?proposed"?' {} \; 2>/dev/null | wc -l)
+        PROCESSING=$(find data/tickets -name "TKT-*.md" -exec grep -lE 'status:\s*"?processing"?' {} \; 2>/dev/null | wc -l)
+        WAITING=$(find data/tickets -name "TKT-*.md" -exec grep -lE 'status:\s*"?waiting_approval"?' {} \; 2>/dev/null | wc -l)
+        APPROVED=$(find data/tickets -name "TKT-*.md" -exec grep -lE 'status:\s*"?approved"?' {} \; 2>/dev/null | wc -l)
+        PUBLISHING=$(find data/tickets -name "TKT-*.md" -exec grep -lE 'status:\s*"?publishing"?' {} \; 2>/dev/null | wc -l)
+        PUBLISHED=$(find data/tickets -name "TKT-*.md" -exec grep -lE 'status:\s*"?published"?' {} \; 2>/dev/null | wc -l)
+        FAILED=$(find data/tickets -name "TKT-*.md" -exec grep -lE 'status:\s*"?failed"?' {} \; 2>/dev/null | wc -l)
+        REJECTED=$(find data/tickets -name "TKT-*.md" -exec grep -lE 'status:\s*"?rejected"?' {} \; 2>/dev/null | wc -l)
         
         echo "   🟡 Proposed: $PROPOSED"
+        echo "   ⚙️  Processing: $PROCESSING"
+        echo "   ⏳ Waiting Approval: $WAITING"
         echo "   🟢 Approved: $APPROVED"
-        echo "   📝 Drafting: $DRAFTING"
-        echo "   ✅ Ready: $READY"
+        echo "   📤 Publishing: $PUBLISHING"
         echo "   🚀 Published: $PUBLISHED"
         if [ $FAILED -gt 0 ]; then
             echo "   ❌ Failed: $FAILED"
         fi
+        if [ $REJECTED -gt 0 ]; then
+            echo "   🚫 Rejected: $REJECTED"
+        fi
     fi
     
-    echo ""
-    echo "📅 待处理任务 (data/tasks.md):"
-    if [ -f data/tasks.md ]; then
-        TODO_TASKS=$(grep -c "\[TODO\]" data/tasks.md 2>/dev/null || echo 0)
-        WAITING_TASKS=$(grep -c "\[WAITING_APPROVAL\]" data/tasks.md 2>/dev/null || echo 0)
-        echo "   🆕 TODO: $TODO_TASKS"
-        echo "   ⏳ WAITING_APPROVAL: $WAITING_TASKS"
-    fi
+
     
     # 4. Drafts数量
     echo ""

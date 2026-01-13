@@ -28,8 +28,8 @@ To trigger the automation, use the following command:
    **初始化**：脚本创建一个新分支。
 2. **Session Launch**: A Zellij session is created and OpenCode is triggered with the "RalphLoop" prompt.
    **会话启动**：创建一个 Zellij 会话，并使用 “RalphLoop” 提示词触发 OpenCode。
-3. **Execution**: OpenCode writes `data/tasks.md`, implements, and debugs.
-   **执行**：OpenCode 编写 `data/tasks.md`，执行并调试。
+3. **Execution**: OpenCode creates tickets in `data/tickets/`, implements, and debugs.
+   **执行**：OpenCode 在 `data/tickets/` 创建工单，执行并调试。
 4. **Documentation**: A detailed process log is saved to `docs/archive/ralphloop-<timestamp>.md`.
    **文档记录**：详细的过程日志保存在 `docs/archive/ralphloop-<timestamp>.md`。
 5. **Cleanup**: The session detaches automatically.

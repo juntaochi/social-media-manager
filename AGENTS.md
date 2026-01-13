@@ -1,70 +1,148 @@
 # Media Agent System - Agent Guidelines
 
-## 🤖 Agent Orchestration Model
+## Content Philosophy
 
-The system operates on a **Manager-Subagent** architecture. All workflow decisions are delegated to the **Manager Agent**, which orchestrates specialized sub-agents.
+This system creates **relationship-building content**, not technical blogs or automated commit announcements.
 
-### Agent Hierarchy
-- **Manager Agent** (`@manager-agent`): The brain. Orchestrates the pipeline, manages ticket states, and dispatches sub-agents.
-- **Analyst Agent** (`@analyst-agent`): The eyes. Scans projects, detects changes, and creates `proposed` tickets.
-- **Writer Agent** (`@writer-agent`): The voice. Transforms `approved` tickets into engaging multi-platform drafts.
-- **Publisher Agent** (`@publisher-agent`): The hands. Publishes `ready` drafts to Typefully via official MCP.
+The goal: Help the user build community, grow their network, and create job opportunities through authentic "Build in Public" posts.
 
----
+**We create:**
+- "hey I'm building X" launch moments
+- "finally got X working" victory stories
+- Casual progress updates that invite following along
+- Honest struggles that create relatability
 
-## 📂 Project Structure & SSOT
+**We avoid:**
+- Technical deep dives that educate but don't connect
+- Structured posts that feel like press releases
+- AI-sounding content (see `voice_calibration.md`)
+- Automated commit message republishing
 
-- **`.opencode/agent/`**: Contains the core logic and manifests for each agent. These are the "manuals" the agents follow.
-- **`data/tickets/`**: **Single Source of Truth (SSOT)**. Every content piece is a ticket (`TKT-xxx.md`) with state managed in YAML frontmatter.
-- **`scripts/bridge_tickets.py`**: Synchronization layer between local tickets and the Notion Dashboard.
-- **`scripts/run_pipeline.sh`**: The primary entry point for executing the manager agent.
+## Agent Roles
 
----
+### Manager Agent (`@manager-agent`)
+The orchestrator. Reads ticket state, acquires locks, dispatches sub-agents, moves tickets through lifecycle.
 
-## 🚀 Development Commands
+### Analyst Agent (`@analyst-agent`)  
+The story detector. Scans projects for **shareable moments**, not just technical changes.
 
-### Running the Pipeline
-```bash
-# Process everything (Analyze -> Write -> Publish)
-./scripts/run_pipeline.sh full
+Looks for:
+- Launch moments (something new is working)
+- Struggle/victory stories
+- Visual "check this out" opportunities
+- Relatable developer experiences
 
-# Specifically run analysis or status report
-./scripts/run_pipeline.sh analyze
-./scripts/run_pipeline.sh status
+Ignores:
+- Routine maintenance
+- Technical-only changes with no human angle
+- Changes that need too much explanation
+
+### Writer Agent (`@writer-agent`)
+The casual content creator. Writes like texting a dev friend, not like publishing a blog.
+
+Must read `docs/agents/writer/references/voice_calibration.md` before every draft.
+
+Key principles:
+- Shorter than you think
+- No AI-sounding phrases (see anti-slop list)
+- One idea per tweet
+- Personality over polish
+
+### Publisher Agent (`@publisher-agent`)
+The hands. Creates drafts in Typefully for human review. **Never auto-publishes.**
+
+## Key Reference Files
+
+| File | Purpose |
+|------|---------|
+| `docs/agents/writer/references/voice_calibration.md` | Anti-AI patterns, natural language replacements |
+| `docs/agents/writer/references/casual_examples.md` | Good vs bad content examples |
+| `docs/agents/writer/references/build_in_public_guide.md` | BiP philosophy and principles |
+
+## Project Structure
+
+```
+.opencode/agent/           # Agent manifests (the "manuals")
+data/tickets/              # SSOT - one ticket per content piece
+data/drafts/               # Writer output
+data/context/              # Analyst summaries
+docs/agents/               # Reference materials
+scripts/                   # Pipeline runners and sync tools
 ```
 
-### Automation & Sync
-```bash
-# Start background sync (Notion <-> Tickets)
-nohup bash -c 'export $(cat .env | grep -v "^#" | xargs) && python3 scripts/bridge_tickets.py --watch --interval 60' > logs/ticket_sync.log 2>&1 &
+## Commands
 
-# Monitor all activity
-./scripts/monitor.sh
+```bash
+./scripts/run_pipeline.sh full      # Run complete pipeline
+./scripts/run_pipeline.sh analyze   # Just analyze for new stories
+./scripts/run_pipeline.sh status    # Check current state
+./scripts/monitor.sh                # Real-time dashboard
 ```
 
----
+## Ticket Types
 
-## 📏 Standards & Conventions
+| Type | When to Create |
+|------|----------------|
+| `launch` | Something new is live/working for the first time |
+| `story` | Debugging tale, struggle/victory, learning moment |
+| `progress` | Week N update, milestone, journey check-in |
+| `insight` | Decision share, tool comparison, discovery |
 
-### Ticket Lifecycle
-1. `proposed`: Created by Analyst after scanning projects.
-2. `approved`: Human approval (via Notion or by editing the MD file).
-3. `drafting`: Manager dispatches Writer.
-4. `ready`: Writer finishes the draft.
-5. `published`: Publisher successfully posts to Typefully.
+## Ticket Format (SSOT)
 
-### Code & Config
-- **Python**: PEP 8, snake_case, 4-space indents.
-- **Markdown**: YAML frontmatter must include `id`, `status`, `project`, `type`.
-- **Agents**: Never hardcode logic in scripts that belongs in agent manifests. Keep scripts as thin wrappers around `opencode run`.
+Each ticket in `data/tickets/` is a Markdown file with YAML frontmatter. See `data/tickets/_TEMPLATE.md` for full reference.
 
----
+### Core Fields
 
-## 🔐 Security
-- **No Secrets**: Never commit `.env` or print tokens to logs.
-- **Locking**: Manager Agent implements a locking mechanism (`locked_by`) in ticket frontmatter to prevent concurrent processing.
+```yaml
+tkt_id: TKT-XXX              # Unique identifier
+title: "Story Title"          # Display title in Notion (main column)
+status: proposed              # Lifecycle state (see below)
+source: ai                    # ai or user
+project: repo-name            # Project context (syncs to Notion "Repo")
+type: story                   # launch, story, progress, insight
+platforms: [twitter]          # Target platforms
+priority: medium              # high, medium, low
+```
+
+### Content Fields
+
+```yaml
+draft_content: ""             # Generated content (for quick preview)
+draft_path: ""                # Path to draft file in data/drafts/
+published_url: ""             # Typefully post URL after publishing
+typefully_draft_id: ""        # Typefully draft ID for updates
+```
+
+### System Fields
+
+```yaml
+locked_by: ""                 # Agent currently processing
+locked_at: ""                 # ISO timestamp when lock acquired
+error: ""                     # Error message if failed
+retry_count: 0                # Number of retry attempts
+created: ""                   # ISO timestamp when ticket created
+approved: ""                  # ISO timestamp when approved
+published: ""                 # ISO timestamp when published
+```
+
+### Status Lifecycle
+
+```
+proposed → approved → drafting → ready → publishing → published
+    ↓                                         ↓
+ rejected                                   failed
+```
+
+Human approval is **mandatory** between `proposed` and `approved`. This is the safety gate.
+
+## Security
+
+- No secrets in commits or logs
+- Locking mechanism prevents race conditions
+- Human-in-the-loop for all publishing
 
 ---
 
 **Last Updated**: 2026-01-13
-**Current Orchestrator**: `manager-agent`
+**Content Philosophy**: Relationship-building over technical education

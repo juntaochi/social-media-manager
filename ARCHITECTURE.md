@@ -31,7 +31,7 @@ The Media Agent system is built on three core principles:
 │                   scripts/run_pipeline.py                       │
 │                                                                 │
 │  • Reads ticket directory (data/tickets/*.md)                   │
-│  • Manages agent-driven state transitions                      │
+│  • Manages agent-driven state transitions                       │
 │  • Dispatches work to agents                                    │
 │  • Handles errors and retries                                   │
 └───┬─────────────┬─────────────┬─────────────┬──────────────────┘
@@ -46,7 +46,7 @@ The Media Agent system is built on three core principles:
     ▼            ▼            ▼              ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                     MCP Integration Layer                        │
-│                     (.claude/config.json)                        │
+│                     (.opencode/config.json)                      │
 ├──────────────┬─────────────────┬──────────────────┬─────────────┤
 │   GitHub     │   Typefully     │   Filesystem     │   Custom    │
 │  MCP Server  │   MCP Server    │   MCP Server     │   Scripts   │
@@ -56,43 +56,37 @@ The Media Agent system is built on three core principles:
 ┌──────────┐    ┌──────────────┐   ┌──────────┐   ┌──────────────┐
 │  GitHub  │    │  Typefully   │   │   Local  │   │    Bridge    │
 │   API    │    │     API      │   │   Files  │   │   Scripts    │
-┌──────────┘    └──────────────┘   └──────────┘   └──────────────┘
+└──────────┘    └──────────────┘   └──────────┘   └──────────────┘
 ```
 
 ## Data Flow
 
 ### Ticket-Centric Workflow
 
-1. **Analyst Agent** scans projects and creates tickets in `data/tickets/*.md` (Status: `proposed`)
+```
+1. Analyst Agent scans projects and creates tickets (Status: proposed)
    │
    ▼
-2. **bridge_tickets.py** syncs new tickets to **Notion Dashboard**
+2. bridge_tickets.py syncs new tickets to Notion Dashboard
    │
    ▼
-3. **[HUMAN REVIEW]** User reviews tickets in Notion or Markdown, changes status → `approved`
+3. [HUMAN REVIEW] User reviews in Notion or Markdown, status → approved
    │
    ▼
-4. **bridge_tickets.py** syncs `approved` status back to local ticket files
+4. bridge_tickets.py syncs approved status back to local files
    │
    ▼
-5. **Manager Agent** identifies `approved` ticket
+5. Manager Agent identifies approved ticket
    │
    ▼
-6. **Writer Agent** 
-    - Reads ticket rationale and references
-    - Creates social content
-    - Saves to `data/drafts/`
-    - Status → `ready`
+6. Writer Agent creates content, saves to data/drafts/, status → ready
    │
    ▼
-7. **Publisher Agent**
-    - Reads `ready` ticket and draft
-    - Uploads media (if any)
-    - Creates Typefully draft
-    - Status → `published`
+7. Publisher Agent uploads to Typefully, status → published
    │
    ▼
-8. **bridge_tickets.py** syncs `published` status and Typefully URLs back to Notion
+8. bridge_tickets.py syncs published status and URLs to Notion
+```
 
 ## Agent Architecture
 
@@ -120,14 +114,14 @@ elif ticket.status == 'ready':
     dispatch_to_publisher(ticket)
 ```
 
-### 2. Analyst Agent (formerly Reader)
+### 2. Analyst Agent
 
-**Role**: Project intelligence and discovery
+**Role**: Project intelligence and story detection
 
 **Responsibilities**:
 - Fetch commit data from GitHub
 - Analyze code changes (diff)
-- Identify "post-worthy" updates
+- Identify "post-worthy" updates (shareable moments)
 - Create new tickets in `data/tickets/` with `proposed` status
 
 **Tools Access**:
@@ -137,193 +131,13 @@ elif ticket.status == 'ready':
 **Output**: Ticket in `data/tickets/`
 ```markdown
 ---
-id: TKT-001
+tkt_id: TKT-001
+title: "Story Title"
 status: proposed
 project: social-media-manager
-type: feature
+type: story
 ---
-# Ticket Title
-...
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        User Interface                           │
-│                  (data/tasks.md - Text File)                    │
-└────────────────────────┬────────────────────────────────────────┘
-                         │
-                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   Orchestration Layer                           │
-│                   scripts/run_pipeline.py                       │
-│                                                                 │
-│  • Reads task queue (tasks.md)                                 │
-│  • Manages state transitions                                   │
-│  • Dispatches work to agents                                   │
-│  • Handles errors and retries                                  │
-└───┬─────────────┬─────────────┬─────────────┬──────────────────┘
-    │             │             │             │
-    ▼             ▼             ▼             ▼
-┌────────┐   ┌────────┐   ┌────────┐   ┌───────────┐
-│Manager │   │ Reader │   │ Writer │   │ Publisher │
-│ Agent  │   │ Agent  │   │ Agent  │   │  Agent    │
-└───┬────┘   └───┬────┘   └───┬────┘   └─────┬─────┘
-    │            │            │              │
-    │            │            │              │
-    ▼            ▼            ▼              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     MCP Integration Layer                        │
-│                     (.claude/config.json)                        │
-├──────────────┬─────────────────┬──────────────────┬─────────────┤
-│   GitHub     │   Typefully     │   Filesystem     │   Custom    │
-│  MCP Server  │   MCP Server    │   MCP Server     │   Scripts   │
-└──────┬───────┴────────┬────────┴────────┬─────────┴──────┬──────┘
-       │                │                 │                │
-       ▼                ▼                 ▼                ▼
-┌──────────┐    ┌──────────────┐   ┌──────────┐   ┌──────────────┐
-│  GitHub  │    │  Typefully   │   │   Local  │   │    Bridge    │
-│   API    │    │     API      │   │   Files  │   │   Scripts    │
-└──────────┘    └──────────────┘   └──────────┘   └──────────────┘
-```
-
-## Data Flow
-
-### Complete Pipeline Flow
-
-```
-1. User adds task to tasks.md
-   │
-   ▼
-2. run_pipeline.py scans tasks.md
-   │
-   ▼
-3. Manager Agent identifies TODO task
-   │
-   ├─ GitHub Commit? ──────────────────────────┐
-   │                                           │
-   ▼                                           ▼
-4a. Reader Agent                          4b. Writer Agent (direct)
-    - Calls GitHub MCP                        - Creates content
-    - Analyzes commit                         - Saves to drafts/
-    - Saves to context/                       │
-    │                                         │
-    ▼                                         │
-5. Writer Agent ──────────────────────────────┘
-    - Reads context file
-    - Creates social content
-    - Saves to drafts/
-    │
-    ▼
-6. Status → WAITING_APPROVAL
-    │
-    ▼
-7. [HUMAN REVIEW]
-    - Reads draft
-    - Edits if needed
-    - Changes status → APPROVED
-    │
-    ▼
-8. Publisher Agent
-    - Reads approved draft
-    - Uploads media (if any)
-    - Creates Typefully draft
-    │
-    ▼
-9. Status → DONE
-    - Task complete
-    - URL saved in tasks.md
-```
-
-## Agent Architecture
-
-### 1. Manager Agent
-
-**Role**: Orchestrator and state machine controller
-
-**Responsibilities**:
-- Read and parse `tasks.md`
-- Identify tasks ready for processing
-- Dispatch work to specialized agents
-- Update task statuses
-- Handle errors and retries
-
-**Tools Access**:
-- File system (read/write tasks.md)
-- Python subprocess (to call other agents)
-
-**Decision Logic**:
-```python
-if task.status == 'TODO':
-    if is_github_commit(task):
-        dispatch_to_reader(task)
-    elif is_summary_based(task):
-        dispatch_to_writer(task)
-    elif is_freeform(task):
-        dispatch_to_writer(task)
-
-elif task.status == 'PROCESSING':
-    check_if_agent_completed()
-
-elif task.status == 'APPROVED':
-    dispatch_to_publisher(task)
-```
-
-### 2. Reader Agent
-
-**Role**: Technical code analyst
-
-**Responsibilities**:
-- Fetch commit data from GitHub
-- Analyze code changes (diff)
-- Extract meaningful context
-- Generate technical summary
-
-**Tools Access**:
-- GitHub MCP Server
-  - `get_commit`
-  - `get_file_contents`
-  - `search_code`
-
-**Input**: Commit hash + repository name
-
-**Output**: Technical summary in Markdown
-```markdown
-# Technical Summary: [Commit Title]
-
-## Core Change
-[One-sentence explanation]
-
-## Technical Details
-[Specific implementation notes]
-
-## Impact Analysis
-[UI, API, Database, Performance implications]
-
-## Context for Content Creation
-[Why this matters]
-```
-
-### 2. Analyst Agent (formerly Reader)
-
-**Role**: Project intelligence and discovery
-
-**Responsibilities**:
-- Fetch commit data from GitHub
-- Analyze code changes (diff)
-- Identify "post-worthy" updates
-- Create new tickets in `data/tickets/` with `proposed` status
-
-**Tools Access**:
-- GitHub MCP Server
-- Filesystem (create tickets)
-
-**Output**: Ticket in `data/tickets/`
-```markdown
----
-id: TKT-001
-status: proposed
-project: social-media-manager
-type: feature
----
-# Ticket Title
+# Story Title
 ...
 ```
 
@@ -337,6 +151,7 @@ type: feature
 - Structure content for Twitter/LinkedIn
 - Suggest media assets needed
 - Update ticket status to `ready` upon completion
+- Fill `draft_content` field with generated text
 
 **Tools Access**:
 - Filesystem (to read tickets and context)
@@ -345,23 +160,6 @@ type: feature
 **Input**: Ticket ID (e.g., `TKT-001`)
 
 **Output**: Social media draft in `data/drafts/`
-
-### 4. Publisher Agent
-
-**Role**: Distribution and media handler
-
-**Responsibilities**:
-- Verify ticket status is `ready`
-- Parse draft content
-- Handle media uploads via `bridge_typefully.py`
-- Create Typefully draft/post
-- Update ticket status to `published` and record URLs
-
-**Tools Access**:
-- Typefully MCP Server
-- Custom bridge script (for media)
-- Bash (to call bridge_typefully.py)
-
 
 **Style Guidelines** (in prompt):
 - Authentic, transparent tone
@@ -375,21 +173,20 @@ type: feature
 **Role**: Distribution and media handler
 
 **Responsibilities**:
-- Verify approval status (security check)
+- Verify ticket status is `ready`
 - Parse draft content
-- Handle media uploads
+- Handle media uploads via `bridge_typefully.py`
 - Create Typefully draft/post
-- Return confirmation URL
+- Update ticket status to `published` and record `published_url`
+- Fill `typefully_draft_id` for future updates
 
 **Tools Access**:
 - Typefully MCP Server
-  - `create_draft`
-  - `schedule_post`
 - Custom bridge script (for media)
 - Bash (to call bridge_typefully.py)
 
 **Security**:
-- **MUST** verify task status is `APPROVED`
+- **MUST** verify task status is `ready`
 - **MUST** validate no sensitive data in content
 - Dry-run mode available for testing
 
@@ -452,14 +249,48 @@ The system uses a unified state machine for both local tickets and Notion synchr
 | publishing | published | Publisher Agent | Typefully API returns success |
 | * | failed | Any Agent | Error encountered (with retry logic) |
 
+## Ticket Schema (SSOT)
+
+Each ticket in `data/tickets/` is a Markdown file with YAML frontmatter.
+
+### Core Fields
+```yaml
+tkt_id: TKT-XXX              # Unique identifier
+title: "Story Title"          # Display title in Notion (main column)
+status: proposed              # Lifecycle state
+source: ai                    # ai or user
+project: repo-name            # Project context (syncs to Notion "Repo")
+type: story                   # launch, story, progress, insight
+platforms: [twitter]          # Target platforms
+priority: medium              # high, medium, low
+```
+
+### Content Fields
+```yaml
+draft_content: ""             # Generated content (quick preview)
+draft_path: ""                # Path to draft file in data/drafts/
+published_url: ""             # Typefully post URL after publishing
+typefully_draft_id: ""        # Typefully draft ID for updates
+```
+
+### System Fields
+```yaml
+locked_by: ""                 # Agent currently processing
+locked_at: ""                 # ISO timestamp when lock acquired
+error: ""                     # Error message if failed
+retry_count: 0                # Number of retry attempts
+created: ""                   # ISO timestamp when created
+approved: ""                  # ISO timestamp when approved
+published: ""                 # ISO timestamp when published
+```
+
 ## File System Structure
 
 ```
 social-media-manager/
 │
-├── .claude/                    # Claude Code configuration
-│   ├── config.json            # MCP servers configuration
-│   └── agents/                # Agent manifests
+├── .opencode/                 # OpenCode configuration
+│   └── agent/                 # Agent manifests
 │       ├── manager-agent.md
 │       ├── analyst-agent.md
 │       ├── writer-agent.md
@@ -473,7 +304,7 @@ social-media-manager/
 │   └── drafts/                # Social content (Typefully-ready)
 │
 ├── scripts/                   # Executable logic
-│   ├── run_pipeline.py       # Main orchestrator
+│   ├── run_pipeline.py        # Main orchestrator
 │   ├── bridge_tickets.py      # Notion sync bridge
 │   └── bridge_typefully.py    # Media/Typefully bridge
 │
@@ -500,9 +331,22 @@ The `scripts/bridge_tickets.py` script acts as the synchronization layer between
    - Draft content from `data/drafts/` is synced to a "Draft Content" property for easy review.
 
 2. **Notion -> Local**:
-   - Status changes in Notion (e.g., `PROPOSED` -> `APPROVED`) are pulled to local Markdown files.
+   - Status changes in Notion (e.g., `proposed` -> `approved`) are pulled to local Markdown files.
    - This allows the user to manage the entire pipeline from a mobile Notion app or desktop dashboard.
 
+### Property Mapping
+
+| Local Field | Notion Property |
+|-------------|-----------------|
+| `tkt_id` | TKT ID |
+| `title` | Title (main column) |
+| `status` | Status |
+| `project` | Repo |
+| `type` | Type |
+| `draft_content` | Draft Content |
+| `draft_path` | Draft Path |
+| `published_url` | Published URL |
+| `error` | Error |
 
 ## MCP Integration
 
@@ -532,7 +376,7 @@ Each MCP server runs as a separate process, communicating via stdio or HTTP:
 
 When an agent needs to access GitHub:
 
-1. Claude Code reads MCP config
+1. OpenCode reads MCP config
 2. Spawns the GitHub MCP server process
 3. Server advertises available tools (e.g., `get_commit`)
 4. Agent can call tools by name
@@ -540,11 +384,11 @@ When an agent needs to access GitHub:
 6. Results returned to agent in standardized format
 
 ```
-Agent → Claude Code → MCP Client → MCP Server → GitHub API
+Agent → OpenCode → MCP Client → MCP Server → GitHub API
                                         ↓
                                     Response
                                         ↓
-Agent ← Claude Code ← MCP Client ← MCP Server
+Agent ← OpenCode ← MCP Client ← MCP Server
 ```
 
 ## Security Model
@@ -557,11 +401,11 @@ Agent ← Claude Code ← MCP Client ← MCP Server
 
 ### Human-in-the-Loop
 
-Critical gate: **APPROVED** status required for publishing
+Critical gate: **approved** status required for publishing
 
 ```python
 # Publisher Agent verification
-if task.status != 'APPROVED':
+if ticket.status != 'ready':
     raise SecurityError("Cannot publish unapproved content")
 ```
 
@@ -616,7 +460,7 @@ def process_github_commit(commit_hash, repo):
 ```
 
 **Distributed State**:
-- Replace tasks.md with Redis or PostgreSQL
+- Replace ticket files with Redis or PostgreSQL
 - Add task locking mechanism
 - Event-driven architecture
 
@@ -624,13 +468,13 @@ def process_github_commit(commit_hash, repo):
 
 ### Adding New Agents
 
-1. Create prompt file in `.claude/prompts/new_agent.md`
+1. Create prompt file in `.opencode/agent/new_agent.md`
 2. Add dispatch logic in `run_pipeline.py`:
 ```python
 def process_custom_task(task, task_idx, lines):
-    result = call_claude_agent(
+    result = call_agent(
         prompt=task['content'],
-        system_prompt_path=PROMPTS_DIR / "new_agent.md",
+        system_prompt_path=AGENTS_DIR / "new_agent.md",
         agent_name="NewAgent"
     )
     # Process result...
@@ -638,7 +482,7 @@ def process_custom_task(task, task_idx, lines):
 
 ### Adding New MCP Servers
 
-1. Update `.claude/config.json`:
+1. Update `.opencode/config.json`:
 ```json
 {
   "mcpServers": {
@@ -743,11 +587,11 @@ grep "DONE" logs/*.log | wc -l
 ### State Inspection
 
 ```bash
-# Current task statuses
-grep -E "\[.*\]" data/tasks.md | cut -d']' -f2 | cut -d'[' -f2 | sort | uniq -c
+# Current ticket statuses
+for f in data/tickets/TKT-*.md; do grep "status:" "$f"; done
 
 # Pending approvals
-grep "WAITING_APPROVAL" data/tasks.md
+grep -l "status: proposed" data/tickets/TKT-*.md
 ```
 
 ### Agent Testing
@@ -755,11 +599,11 @@ grep "WAITING_APPROVAL" data/tasks.md
 Test individual agents without the full pipeline:
 
 ```bash
-# Test Reader Agent
-claude -p "$(cat .claude/prompts/reader.md)\n\nAnalyze commit abc123 in repo user/repo"
+# Test Analyst Agent
+opencode --agent analyst-agent "Analyze recent commits in social-media-manager"
 
-# Test Writer Agent
-claude -p "$(cat .claude/prompts/writer.md)\n\nCreate thread from: $(cat data/context/summary.md)"
+# Test Writer Agent  
+opencode --agent writer-agent "Create draft for TKT-001"
 ```
 
 ## Conclusion

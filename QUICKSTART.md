@@ -226,7 +226,7 @@ chmod +x scripts/*.py
 
 1. **Customize agents**: Edit `.opencode/agent/*.md` to change agent behavior
 2. **Add media**: Place images in `assets/` and reference them in drafts
-3. **Track history**: Commit your `data/tasks.md` to Git
+3. **Track history**: Commit your `data/tickets/` to Git
 
 ## Tips for Success
 

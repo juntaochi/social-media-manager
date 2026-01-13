@@ -206,6 +206,20 @@ def load_env_fallback():
     return None
 
 
+def enforce_draft_only(request: dict) -> dict:
+    if request.get("method") == "tools/call":
+        params = request.get("params", {})
+        tool_name = params.get("name")
+        arguments = params.get("arguments", {})
+        
+        if tool_name in ("typefully_create_draft", "typefully_edit_draft"):
+            if "requestBody" in arguments:
+                rb = arguments["requestBody"]
+                if "publish_at" in rb:
+                    del rb["publish_at"]
+    return request
+
+
 def run_proxy():
     api_key = os.environ.get("TYPEFULLY_API_KEY")
     if not api_key or api_key.startswith("{env:"):
@@ -226,6 +240,8 @@ def run_proxy():
             request = json.loads(line)
             method = request.get("method", "")
             request_id = request.get("id")
+            
+            request = enforce_draft_only(request)
             
             if method == "notifications/initialized":
                 forward_to_typefully_sse(api_key, request)

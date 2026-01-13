@@ -47,7 +47,7 @@ fi
 echo "启动 Notion 同步服务..."
 cd "$PROJECT_ROOT"
 
-nohup python3 scripts/bridge_notion.py --watch --interval 300 \
+nohup python3 scripts/bridge_tickets.py --watch --interval 300 \
     >> "$LOG_FILE" 2>&1 &
 
 PID=$!

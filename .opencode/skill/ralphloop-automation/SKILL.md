@@ -13,7 +13,7 @@ Automates a deep work cycle ("睡前任务"): creates a git branch, starts a Zel
 2. **Branch Creation**: Create a new git branch \`ralph/feature-name\`.
 3. **Zellij Session**: Launch a new Zellij session named \`ralphloop-<timestamp>\`.
 4. **OpenCode RalphLoop**:
-   - Write a detailed \`data/tasks.md\` entry.
+   - Create tickets in \`data/tickets/\` directory.
    - Run OpenCode with a "RalphLoop" prompt to implement and debug.
 5. **Documentation**: Generate \`docs/archive/ralphloop-<timestamp>.md\` in CN/EN.
 6. **Detach**: Detach from Zellij using \`zellij detach\`.

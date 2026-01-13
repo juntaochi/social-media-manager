@@ -1,22 +1,26 @@
 ---
-id: TKT-000-TEMPLATE
+tkt_id: TKT-000-TEMPLATE
+title: "[Ticket Title]"
 status: template
 source: system
 project: ""
 type: ""
 platforms: []
 priority: medium
-created: ""
-approved: ""
-published: ""
+draft_content: ""
+published_url: ""
 typefully_draft_id: ""
 locked_by: ""
 locked_at: ""
 error: ""
 retry_count: 0
+created: ""
+approved: ""
+published: ""
 ---
 
 # [Ticket Title]
+
 
 ## Rationale
 Why this content should be created.

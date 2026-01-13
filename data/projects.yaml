@@ -3,16 +3,17 @@
 # The Analyst agent uses this to understand project context and generate tickets.
 
 projects:
-  # Example project entry
-  - repo: "{env:GITHUB_REPO}"
-    name: "Social Media Manager"
-    description: "AI-powered automation for Build in Public content from GitHub activity"
-    local_path: "{env:PROJECT_ROOT}"
-    
-    # Social set ID for Typefully (get from typefully_list_social_sets)
-    typefully_social_set_id: "{env:TYPEFULLY_SOCIAL_SET_ID}"
+  # The Master Pipeline (This Repo)
+  - repo: "jac/social-media-manager"
+    name: "Pipeline Master"
+    description: "Multi-agent automation for building in public"
+    local_path: "."
+    typefully_social_set_id: "" # Optional: defaults to main account
+    last_analyzed: "2026-01-13"
 
-# Add more projects below:
-# - repo: username/another-project
-#   name: "Project Name"
-#   ...
+  # Example of an external local project
+  # - repo: "jac/my-other-app"
+  #   name: "My Other App"
+  #   description: "A cool side project"
+  #   local_path: "../my-other-app"
+  #   last_analyzed: ""
